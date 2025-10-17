@@ -1,0 +1,30 @@
+/*
+    Contains CSS for the main page
+*/
+
+Header {
+    margin: 5;
+    text-align: center;
+}
+
+#button-container {
+    align: center top; 
+}
+
+Vertical {
+    border: solid white;
+    width: auto;
+    height: auto;
+}
+
+Button {
+    text-style: bold;
+    background: transparent;
+    border: none;
+    width: 50;
+}
+
+Button:focus {
+    background: white;
+    color: black;
+}
