@@ -3,12 +3,13 @@
 */
 
 Header {
-    margin: 5;
+    position: absolute;
+    offset-y: 4;
     text-align: center;
 }
 
 #button-container {
-    align: center top; 
+    align: center middle; 
 }
 
 Vertical {

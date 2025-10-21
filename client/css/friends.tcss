@@ -1,0 +1,18 @@
+Screen {
+    align: center middle;
+}
+
+#friends-button-container {
+    align: center middle;
+    width: auto;
+    height: auto;
+    border: solid white;
+}
+
+#friends-button-container Button {
+    width: 50;
+}
+
+#new-friends-button {
+    width: 10
+}
