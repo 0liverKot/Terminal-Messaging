@@ -9,7 +9,6 @@ Screen {
 }
 
 #friends-button-container Button {
-    width: 50;
 }
 
 VerticalScroll {
@@ -19,8 +18,26 @@ VerticalScroll {
 
 }
 
-VerticalScroll Button {
+VerticalScroll Horizontal {
+    width: 50;
+    height: auto;
     align: left middle;
+}
+
+.scroll-button {
+    align: left middle;
+    width: auto;
+}
+
+.accept {
+    color: green;
+    width: 25;
+
+}
+
+.decline {
+    color: red;
+    width: 25;
 }
 
 #new-friends-button {

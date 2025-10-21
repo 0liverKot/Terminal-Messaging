@@ -1,7 +1,7 @@
 from textual.events import Key
 from textual.screen import Screen
 from textual.widgets import Button, Header
-from textual.containers import Container, VerticalScroll
+from textual.containers import Container, VerticalScroll, Horizontal
 
 class FriendsScreen(Screen):
     TITLE="Friends"
@@ -16,8 +16,8 @@ class FriendsScreen(Screen):
     requests_vcontainer_flag = False
     friends_vcontainer_flag = False
 
-    requests = ["user 1", "user 2", "user 3", "user 4"]
-    friends = ["user 1", "user 2", "user 3", "user 4"]
+    requests = ["oli", "dario", "remi", "trev"]
+    friends = ["oli", "dario", "remi", "trev"]
 
     def compose(self):
         yield Header()
@@ -57,8 +57,19 @@ class FriendsScreen(Screen):
             container.refresh()
 
             for i in list:
-                v_scroll.mount(Button((f"{i}")))
             
+                # container used for requests to replace the button with
+                # accept or decline after pressing 
+                if(type == "requests"):
+                    button = Button(f"{i}", id=f"request-{i}", classes="requests-scroll-button")
+                    request_container = Horizontal(id=f"container-{i}")
+                    v_scroll.mount(request_container)
+                    request_container.mount(button)
+
+                else:
+                    button = Button(f"{i}", classes="friends-scroll-button")
+                    v_scroll.mount(button)
+                
             v_scroll.refresh()
 
 
@@ -96,6 +107,20 @@ class FriendsScreen(Screen):
                     self.friends_vcontainer_flag = False
                 else:
                     await mount_scroll_widget("friends")
+
+
+        # pressing a request then replaces it with accept or decline buttons
+        if(event.button.id.split("-")[0] == "request"): # type: ignore
+
+            id = event.button.id.split("-")[1] # type: ignore
+            container_id = f"container-{id}"           
+            container = self.query_one(f"#{container_id}", Horizontal)
+            event.button.remove()
+
+            container.mount(Button("✓", id=f"accept-{id}", classes="accept"))
+            container.mount(Button("x", id=f"decline-{id}", classes="decline"))
+
+            container.refresh()
 
 
 class AddFriends(Screen):
