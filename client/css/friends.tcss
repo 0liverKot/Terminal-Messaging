@@ -13,6 +13,15 @@ Screen {
     width: 50;
 }
 
+VerticalScroll {
+    width: auto;
+    height: 5;
+}
+
+VerticalScroll Button {
+    align: left middle;
+}
+
 #new-friends-button {
     width: 10
 }
