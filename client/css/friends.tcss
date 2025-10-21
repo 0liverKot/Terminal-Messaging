@@ -6,7 +6,6 @@ Screen {
     align: center middle;
     width: auto;
     height: auto;
-    border: solid white;
 }
 
 #friends-button-container Button {
@@ -14,8 +13,10 @@ Screen {
 }
 
 VerticalScroll {
-    width: auto;
+    width: 50;
     height: 5;
+    border: solid white
+
 }
 
 VerticalScroll Button {
