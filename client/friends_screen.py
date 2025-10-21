@@ -1,3 +1,4 @@
+from textual import events
 from textual.events import Key
 from textual.screen import Screen
 from textual.widgets import Button, Header
@@ -26,6 +27,29 @@ class FriendsScreen(Screen):
             Button(f"Friends          {self.friends_arrow}", id="friends-button"),
             id="friends-button-container"
         )
+
+    async def _on_key(self, event: Key) -> None:
+        
+        match event.key:
+
+            case "escape":
+
+                try:
+                    if not (self.focused.classes.__contains__("accept") or self.focused.classes.__contains__("decline")): # type: ignore
+                        return 
+                except:    
+                    return 
+                
+                # currently focused on an accept or decline button, replace it with the original request
+                id = self.focused.id.split("-")[1] # type: ignore
+                container = self.query_one(f"#container-{id}")
+
+                # remove accept and decline buttons 
+                await self.query_one(f"#accept-{id}", Button).remove()
+                await self.query_one(f"#decline-{id}", Button).remove()
+
+                await container.mount(Button(f"{id}", id=f"request-{id}", classes="request-scroll-button"))
+                container.refresh()
 
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -108,20 +132,21 @@ class FriendsScreen(Screen):
                 else:
                     await mount_scroll_widget("friends")
 
+        try:
+            # pressing a request then replaces it with accept or decline buttons
+            if(event.button.id.split("-")[0] == "request"): # type: ignore
 
-        # pressing a request then replaces it with accept or decline buttons
-        if(event.button.id.split("-")[0] == "request"): # type: ignore
+                id = event.button.id.split("-")[1] # type: ignore
+                container_id = f"container-{id}"           
+                container = self.query_one(f"#{container_id}", Horizontal)
+                event.button.remove()
 
-            id = event.button.id.split("-")[1] # type: ignore
-            container_id = f"container-{id}"           
-            container = self.query_one(f"#{container_id}", Horizontal)
-            event.button.remove()
+                container.mount(Button("✓", id=f"accept-{id}", classes="accept"))
+                container.mount(Button("x", id=f"decline-{id}", classes="decline"))
 
-            container.mount(Button("✓", id=f"accept-{id}", classes="accept"))
-            container.mount(Button("x", id=f"decline-{id}", classes="decline"))
-
-            container.refresh()
-
+                container.refresh()
+        except:
+            pass        
 
 class AddFriends(Screen):
     pass

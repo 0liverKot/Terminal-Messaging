@@ -13,7 +13,7 @@ Screen {
 
 VerticalScroll {
     width: 50;
-    height: 5;
+    height: 10;
     border: solid white
 
 }
