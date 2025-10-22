@@ -2,8 +2,9 @@ from textual import events
 from textual.app import App, ComposeResult
 from textual.widgets import Button, Header
 from textual.containers import Container, Vertical
-from friends_screen import FriendsScreen
-from messages_screen import MessagesScreen
+from client.friends_screen import FriendsScreen
+from client.messages_screen import MessagesScreen
+from common.account import Account
 
 class MyApp(App[str]):
     TITLE = "Terminal Messaging"
@@ -11,6 +12,11 @@ class MyApp(App[str]):
 
     typing = False
     focus_intialised = False
+
+    account = None
+
+    def set_account(self):
+        self.account = Account()
 
     def compose(self) -> ComposeResult:
 
@@ -39,7 +45,7 @@ class MyApp(App[str]):
 
             case "q": 
                 if (not self.typing):
-                    app.pop_screen()
+                    self.pop_screen()
 
         return 
 
@@ -49,11 +55,11 @@ class MyApp(App[str]):
         match event.button.id:
             
             case "message-button": (
-                app.push_screen("messages")
+                self.push_screen("messages")
             )
 
             case "friends-button": (
-                app.push_screen("friends")
+                self.push_screen("friends")
             )
 
             case "exit-button": (
@@ -62,5 +68,6 @@ class MyApp(App[str]):
                 
 if __name__ == "__main__":
     app = MyApp()
+    app.set_account()
     message = app.run()
     print(message)
