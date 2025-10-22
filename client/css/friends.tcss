@@ -13,7 +13,7 @@ Screen {
 
 VerticalScroll {
     width: 50;
-    height: 10;
+    height: 6;
     border: solid white
 
 }
@@ -43,3 +43,27 @@ VerticalScroll Horizontal {
 #new-friends-button {
     width: 10
 }
+
+
+/*
+    mainly stuff for add friends screen
+*/
+
+#new-friends-container {
+    align: center middle;
+    width: auto
+}
+
+#users-VerticalScroll {
+    width: auto;
+    height: 10
+
+}
+
+Input {
+    width: 50;
+    height: 3;
+}
+
+
+

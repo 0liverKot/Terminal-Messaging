@@ -1,7 +1,8 @@
-from textual import events
+from textual import events, on
+from textual.app import ComposeResult
 from textual.events import Key
 from textual.screen import Screen
-from textual.widgets import Button, Header
+from textual.widgets import Button, Header, Input
 from textual.containers import Container, VerticalScroll, Horizontal
 
 class FriendsScreen(Screen):
@@ -20,13 +21,14 @@ class FriendsScreen(Screen):
     requests = ["oli", "dario", "remi", "trev"]
     friends = ["oli", "dario", "remi", "trev"]
 
-    def compose(self):
+    def compose(self) -> ComposeResult:
         yield Header()
         yield Container(
             Button(f"Requests          {self.requests_arrow}", id="requests-button"),
             Button(f"Friends          {self.friends_arrow}", id="friends-button"),
             id="friends-button-container"
         )
+
 
     async def _on_key(self, event: Key) -> None:
         
@@ -65,6 +67,8 @@ class FriendsScreen(Screen):
 
         async def mount_scroll_widget(type):
             
+            add_friends_button = None
+
             if(type == "requests"):
                 list = self.requests
                 id = "requests-list"
@@ -73,12 +77,19 @@ class FriendsScreen(Screen):
                 list = self.friends
                 id = "friends-list"
                 self.friends_vcontainer_flag = True
+                add_friends_button = Button("Add Friend", id="add-friend-button")
 
             v_scroll = VerticalScroll(id=id)
             container = self.query_one("#friends-button-container", Container)
             button = self.query_one(f"#{type}-button", Button)
+            
             await container.mount(v_scroll, after=button)
             container.refresh()
+
+            # add friends button only added in the friends v_scroll container
+            if(add_friends_button != None):
+                await v_scroll.mount(add_friends_button)
+
 
             for i in list:
             
@@ -132,6 +143,12 @@ class FriendsScreen(Screen):
                 else:
                     await mount_scroll_widget("friends")
 
+
+            case "add-friend-button":
+                
+                self.app.install_screen(AddFriends(), "add friends")
+                self.app.push_screen("add friends")
+
         try:
             # pressing a request then replaces it with accept or decline buttons
             if(event.button.id.split("-")[0] == "request"): # type: ignore
@@ -148,5 +165,60 @@ class FriendsScreen(Screen):
         except:
             pass        
 
+
+
 class AddFriends(Screen):
-    pass
+    
+    TITLE="Add Friend"
+
+    # users holds all the users in the app
+    # once the user starts typing, users are filterd and added to display array
+    users = [
+        "dario",
+        "oli",
+        "remi",
+        "trev"
+    ]
+
+    def compose(self) -> ComposeResult:
+
+        yield Header()
+        yield Container(
+            Input(
+                placeholder="Enter username... "
+            ),
+            VerticalScroll(
+                id="users-vertical-scroll"
+            ),
+            id="new-friends-container"
+        )
+
+    # filter through list of users, mimicking a search
+    @on(Input.Changed)
+    async def filter_names(self, event: Input.Changed) -> None:
+        
+        value = event.value
+
+        if(value == ""):
+            display_names = []
+        else: 
+            # at most show ten users
+            display_names = [x for x in self.users if x.startswith(value)]
+            display_names = display_names[:10] 
+
+        v_scroll_users = self.query_one("#users-vertical-scroll", VerticalScroll)
+
+        for button in v_scroll_users.children:
+            
+            # button already exists so so remove from display names
+            if (button.label in display_names): # type: ignore
+                display_names.remove(button.label)    # type: ignore
+            # button no longer in display names so remove 
+            else:
+                button.remove()
+
+        for name in display_names:
+            button = Button(f"{name}", id=f"addfriend-{name}")
+            v_scroll_users.mount(button)
+
+        v_scroll_users.refresh()
