@@ -17,12 +17,12 @@ class ConversationModel(Base):
 
 class FriendsModel(Base):
     __tablename__ = "friends"
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    friend_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    user_name = Column(VARCHAR(15), ForeignKey("users.id"), primary_key=True)
+    friend_name = Column(VARCHAR(15), ForeignKey("users.id"), primary_key=True)
     conversation_id = Column(Integer, ForeignKey("conversation.id"))
 
 
 class RequestsModel(Base):
     __tablename__ = "requests"
-    sender_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    recipient_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    sender_name = Column(VARCHAR(15), ForeignKey("users.id"), primary_key=True)
+    recipient_name = Column(VARCHAR(15), ForeignKey("users.id"), primary_key=True)

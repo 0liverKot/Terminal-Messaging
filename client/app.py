@@ -18,6 +18,12 @@ class MyApp(App[str]):
     def set_account(self):
         self.account = Account()
 
+    def get_account(self) -> Account:
+        if self.account is None:
+            raise AttributeError
+
+        return self.account
+
     def compose(self) -> ComposeResult:
 
         yield Header()
@@ -69,5 +75,6 @@ class MyApp(App[str]):
 if __name__ == "__main__":
     app = MyApp()
     app.set_account()
+    account: Account = app.get_account()
     message = app.run()
     print(message)

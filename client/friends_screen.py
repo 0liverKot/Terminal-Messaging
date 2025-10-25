@@ -4,6 +4,9 @@ from textual.events import Key
 from textual.screen import Screen
 from textual.widgets import Button, Header, Input
 from textual.containers import Container, VerticalScroll, Horizontal
+from server.db.database import ROOT_URL
+import requests
+from client.app import account
 
 class FriendsScreen(Screen):
     TITLE="Friends"
@@ -18,10 +21,13 @@ class FriendsScreen(Screen):
     requests_vcontainer_flag = False
     friends_vcontainer_flag = False
 
-    requests = ["oli", "dario", "remi", "trev"]
-    friends = ["oli", "dario", "remi", "trev"]
+    friend_requests = requests.get(f"{ROOT_URL}requests/get_by_user/{account.get_username}")
+    friends = requests.get(f"{ROOT_URL}friends/get_by_user/{account.get_username}")
+    
+
 
     def compose(self) -> ComposeResult:
+        
         yield Header()
         yield Container(
             Button(f"Requests          {self.requests_arrow}", id="requests-button"),
@@ -70,7 +76,7 @@ class FriendsScreen(Screen):
             add_friends_button = None
 
             if(type == "requests"):
-                list = self.requests
+                list = self.friend_requests
                 id = "requests-list"
                 self.requests_vcontainer_flag = True
             else:
