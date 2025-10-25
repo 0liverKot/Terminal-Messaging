@@ -2,7 +2,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from .db.models import Base
 from .db.database import engine
-from .routes import users, conversations, websocket
+from .routes import users, conversations, websocket, requests, friends
 
 app = FastAPI()
 router = APIRouter(tags=["websockets"])
@@ -17,4 +17,6 @@ Base.metadata.create_all(bind=engine)
 app.include_router(users.router)
 app.include_router(conversations.router)
 app.include_router(websocket.router)
+app.include_router(requests.router)
+app.include_router(friends.router)
 

@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional
+from typing import Optional
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import Select

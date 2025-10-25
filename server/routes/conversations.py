@@ -9,11 +9,10 @@ router = APIRouter(tags=["conversations"])
 class Conversation(BaseModel):
     id: int
     messages: str
-    user_id: int
 
 @router.post("/create")
 async def create_conversation(conversation: Conversation, db: Session = Depends(get_db)):
-    db_conversation = ConversationModel(messages=conversation.messages, user_id=conversation.user_id)
+    db_conversation = ConversationModel(messages=conversation.messages)
     db.add(db_conversation)
     db.commit()
     db.refresh(db_conversation)
