@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 URL_DATABASE = os.environ.get("URL_DATABASE")
+ROOT_URL = os.environ.get("ROOT_URL")
 
 if URL_DATABASE is None:
     raise Exception("issue loading environment variables")

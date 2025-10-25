@@ -1,4 +1,7 @@
 import json
+import requests
+from server.db.database import ROOT_URL
+from server.routes.users import Users
 
 class Account:
 
@@ -22,13 +25,33 @@ class Account:
             file.close()
             self.__init__()
 
+
         if(self.get_username() == ""):
             
-            username = input('''
-            Enter a username: ''')
+            while True:
+                username = input("\n        Enter a username: ")
 
-            password =  input('''
-            Enter a password: ''')
+                # validate username
+                response = requests.get(f"{ROOT_URL}users/get_user/{username}")
+                if(response.json() is not None):
+                    print("\n   Username is already taken \n")
+                    continue 
+                if(not username.isalnum()):
+                    print("\n   Username must only contain alphanumeric characters \n")
+                    continue 
+                if(len(username) > 15): 
+                    print("\n   Username must not be over 15 characters long \n")
+                    continue 
+
+                break
+
+            password = input("\n        Enter a password: ")
+            
+            response = requests.post(f"{ROOT_URL}users/create", json={"username": username, "password": password})
+
+            if(response.status_code == 500):
+                print("\n Internal Server Error \n")
+                exit()
 
             self.set_username(username)
             self.set_password(password)

@@ -10,15 +10,14 @@ from passlib.context import CryptContext
 router = APIRouter(prefix="/users", tags=["users"])
 pwd_context = CryptContext(schemes=["bcrypt"])
 
-class User(BaseModel):
-    id: int 
+class Users(BaseModel):
     username: str
     password: str
 
 
 async def authenticate(username, password):
 
-    user_details: Optional[User] = await get_user_by_username(username)
+    user_details: Optional[Users] = await get_user_by_username(username)
 
     if(user_details is None):
         raise HTTPException(status_code=401, detail="invalid username")
@@ -28,7 +27,7 @@ async def authenticate(username, password):
 
 
 @router.post("/create")
-async def create_user(user: User, db: Session = Depends(get_db)):
+async def create_user(user: Users, db: Session = Depends(get_db)):
     
     user.password = pwd_context.hash(user.password)
     db_user = UserModel(username=user.username, password=user.password)
@@ -37,8 +36,10 @@ async def create_user(user: User, db: Session = Depends(get_db)):
     db.refresh(db_user)
 
 
-@router.get("/get_user")
+@router.get("/get_user/{username}")
 async def get_user_by_username(username: str, db: Session = Depends(get_db)):
     result = db.execute(Select(UserModel).where(UserModel.username == username))
     user = result.scalars().first()
+    
+    # returns None if user is not found
     return user
