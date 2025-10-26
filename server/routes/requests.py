@@ -8,8 +8,8 @@ from server.db.models import RequestsModel
 router = APIRouter(prefix="/requests", tags=["requests"])
 
 class Requests(BaseModel):
-    sender_id: int
-    recipient_id: int
+    sender_name: str
+    recipient_name: str
 
 
 @router.get("/get_by_user/{username}")
@@ -18,3 +18,10 @@ async def get_users_requests(username: str, db: Session = Depends(get_db)):
     requests = result.scalars().all()
 
     return requests
+
+@router.post("/create")
+async def create_friend_request(request: Requests, db: Session = Depends(get_db)):
+    db_request = RequestsModel(sender_name=request.sender_name, recipient_name=request.recipient_name)
+    db.add(db_request)
+    db.commit()
+    db.refresh(db_request)

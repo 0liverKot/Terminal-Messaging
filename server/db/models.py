@@ -19,7 +19,7 @@ class FriendsModel(Base):
     __tablename__ = "friends"
     user_name = Column(VARCHAR(15), ForeignKey("users.username"), primary_key=True)
     friend_name = Column(VARCHAR(15), ForeignKey("users.username"), primary_key=True)
-    conversation_id = Column(Integer, ForeignKey("conversation.id"))
+    conversation_id = Column(Integer, ForeignKey("conversation.id"), nullable=True)
 
 
 class RequestsModel(Base):
