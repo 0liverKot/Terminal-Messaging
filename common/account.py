@@ -8,10 +8,10 @@ class Account:
     username = None
     password = None
 
-    def __init__(self) -> None:
+    def __init__(self, userdetails) -> None:
         
         try: 
-            with open("common/userdetails.json", "r") as file:
+            with open(f"common/{userdetails}", "r") as file:
                 details = json.loads(file.read())
                 self.username = details["username"]
                 self.password = details["password"]
@@ -23,7 +23,7 @@ class Account:
             details_template = '{"username": "", "password": ""}'
             file.write(details_template)
             file.close()
-            self.__init__()
+            self.__init__(userdetails)
 
         if(self.username != ""):
             auth = authenticate(self.username, self.password)
@@ -102,12 +102,3 @@ class Account:
 
     def get_password(self):
         return self.password
-
-
-
-if __name__ == "__main__":
-    account = Account()
-    print(f"""
-    username: {account.get_username()}
-    password: {account.get_password()}
-    """)    

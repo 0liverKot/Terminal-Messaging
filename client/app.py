@@ -6,6 +6,7 @@ from client.friends_screen import FriendsScreen
 from client.messages_screen import MessagesScreen
 from common.account import Account
 from typing import ClassVar
+import sys
 
 class MyApp(App[str]):
     TITLE = "Terminal Messaging"
@@ -13,7 +14,7 @@ class MyApp(App[str]):
 
     def __init__(self):
        
-        self.account = Account()
+        self.account = Account(sys.argv[1])
         self.typing = False
         super().__init__()
 
