@@ -210,12 +210,11 @@ class AddFriends(Screen):
 
     # users holds all the users in the app
     # once the user starts typing, users are filterd and added to display array
-    users = [
-        "dario",
-        "oli",
-        "remi",
-        "trev"
-    ]
+
+    users: list
+
+    async def on_mount(self):
+        self.users = requests.get(f"{ROOT_URL}users/get").json()
 
     def compose(self) -> ComposeResult:
 

@@ -46,3 +46,8 @@ async def get_user_by_username(username: str, db: Session = Depends(get_db)):
     user: Optional[Users] = result.scalars().first()
 
     return user
+
+@router.get("/get")
+async def get_all_users(db: Session = Depends(get_db)):
+    result = db.execute(Select(UserModel.username))
+    return result.scalars().all()
