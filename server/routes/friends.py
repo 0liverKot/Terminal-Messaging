@@ -5,7 +5,7 @@ from sqlalchemy import Select
 from server.db.database import get_db
 from server.db.models import FriendsModel
 
-router = APIRouter(prefix="/requests", tags=["requests"])
+router = APIRouter(prefix="/friends", tags=["requests"])
 
 class Friends(BaseModel):
     user_name: str

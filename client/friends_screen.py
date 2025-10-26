@@ -3,14 +3,21 @@ from textual.app import ComposeResult
 from textual.events import Key
 from textual.screen import Screen
 from textual.widgets import Button, Header, Input
+from textual.reactive import var
 from textual.containers import Container, VerticalScroll, Horizontal
 from server.db.database import ROOT_URL
 import requests
-from client.app import account
+from common.account import Account
 
 class FriendsScreen(Screen):
     TITLE="Friends"
     CSS_PATH = "css/friends.tcss"  
+
+    account: Account
+
+    def __init__(self, account):
+        super().__init__()
+        self.account: Account = account
 
     # used in buttons to represent toggling
     requests_arrow = "^"
@@ -20,10 +27,18 @@ class FriendsScreen(Screen):
     # once hidden flag turns false and widget is destroyed
     requests_vcontainer_flag = False
     friends_vcontainer_flag = False
-
-    friend_requests = requests.get(f"{ROOT_URL}requests/get_by_user/{account.get_username}")
-    friends = requests.get(f"{ROOT_URL}friends/get_by_user/{account.get_username}")
     
+    friend_requests = None
+    friends = None
+    
+    def get_friend_requests(self):
+        result = requests.get(f"{ROOT_URL}requests/get_by_user/{self.account.get_username()}").json()
+        return result
+
+
+    def get_friends(self):
+        result = requests.get(f"{ROOT_URL}friends/get_by_user/{self.account.get_username()}").json()
+        return result
 
 
     def compose(self) -> ComposeResult:
@@ -71,18 +86,14 @@ class FriendsScreen(Screen):
             return arrow
 
 
-        async def mount_scroll_widget(type):
+        async def mount_scroll_widget(type, list):
             
             add_friends_button = None
 
             if(type == "requests"):
-                list = self.friend_requests
                 id = "requests-list"
-                self.requests_vcontainer_flag = True
             else:
-                list = self.friends
                 id = "friends-list"
-                self.friends_vcontainer_flag = True
                 add_friends_button = Button("Add Friend", id="add-friend-button")
 
             v_scroll = VerticalScroll(id=id)
@@ -126,11 +137,22 @@ class FriendsScreen(Screen):
 
                 # handling container showing list of requests 
                 if(self.requests_vcontainer_flag):
-                    container = self.query_one("#requests-list")
-                    await container.remove()
+                    try:
+                        container = self.query_one("#requests-list")
+                        await container.remove()
+                    except:
+                        pass # if no requests then the container hadn't been made and cannot be found
+                    
                     self.requests_vcontainer_flag = False
                 else:
-                    await mount_scroll_widget("requests")
+                    self.requests_vcontainer_flag = True
+                    
+                    # if no requests nothing is shown
+                    list = self.get_friend_requests()
+                    if(len(list) == 0):
+                        return
+
+                    await mount_scroll_widget("requests", list)
 
 
             case "friends-button": 
@@ -141,14 +163,23 @@ class FriendsScreen(Screen):
                 friends_button.label = f"Friends          {self.friends_arrow}"
                 friends_button.refresh()      
                 
-                # handling container showing list of friends 
+                # handling container showing list of friends
                 if(self.friends_vcontainer_flag):
-                    container = self.query_one("#friends-list")
-                    await container.remove()
+                    try:
+                        container = self.query_one("#friends-list")
+                        await container.remove()
+                    except:
+                        pass # if no friends then the container hasn't been made and count be found
                     self.friends_vcontainer_flag = False
                 else:
-                    await mount_scroll_widget("friends")
+                    self.friends_vcontainer_flag = True
+                    
+                    # if no friends nothing is shown
+                    list = self.get_friends()
+                    if(len(list) == 0):
+                        return
 
+                    await mount_scroll_widget("friends", list)
 
             case "add-friend-button":
                 

@@ -5,24 +5,17 @@ from textual.containers import Container, Vertical
 from client.friends_screen import FriendsScreen
 from client.messages_screen import MessagesScreen
 from common.account import Account
+from typing import ClassVar
 
 class MyApp(App[str]):
     TITLE = "Terminal Messaging"
     CSS_PATH="css/app.tcss"
 
-    typing = False
-    focus_intialised = False
-
-    account = None
-
-    def set_account(self):
+    def __init__(self):
+       
         self.account = Account()
-
-    def get_account(self) -> Account:
-        if self.account is None:
-            raise AttributeError
-
-        return self.account
+        self.typing = False
+        super().__init__()
 
     def compose(self) -> ComposeResult:
 
@@ -38,8 +31,8 @@ class MyApp(App[str]):
 
     def on_mount(self) -> None:
 
-        self.install_screen(FriendsScreen(), name="friends")
-        self.install_screen(MessagesScreen(), name="messages")
+        self.install_screen(FriendsScreen(self.account), name="friends")
+        self.install_screen(MessagesScreen(self.account), name="messages")
 
     def on_key(self, event: events.Key) -> None:
         
@@ -71,10 +64,9 @@ class MyApp(App[str]):
             case "exit-button": (
                 self.exit()
             )
-                
+
+
 if __name__ == "__main__":
     app = MyApp()
-    app.set_account()
-    account: Account = app.get_account()
     message = app.run()
     print(message)
