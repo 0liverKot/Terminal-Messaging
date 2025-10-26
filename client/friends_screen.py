@@ -98,6 +98,8 @@ class FriendsScreen(Screen):
 
             v_scroll = VerticalScroll(id=id)
             container = self.query_one("#friends-button-container", Container)
+
+
             button = self.query_one(f"#{type}-button", Button)
             
             await container.mount(v_scroll, after=button)

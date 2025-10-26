@@ -15,7 +15,7 @@ class Friends(BaseModel):
 
 @router.get("/get_by_user/{username}")
 async def get_users_friends(username: str, db: Session = Depends(get_db)):
-    result = db.execute(Select(FriendsModel).where(FriendsModel.user_name == username))
+    result = db.execute(Select(FriendsModel.friend_name).where(FriendsModel.user_name == username))
     friends = result.scalars().all()
 
     return friends

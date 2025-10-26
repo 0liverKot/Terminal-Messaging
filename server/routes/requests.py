@@ -14,7 +14,7 @@ class Requests(BaseModel):
 
 @router.get("/get_by_user/{username}")
 async def get_users_requests(username: str, db: Session = Depends(get_db)):
-    result = db.execute(Select(RequestsModel).where(RequestsModel.recipient_name == username))
+    result = db.execute(Select(RequestsModel.sender_name).where(RequestsModel.recipient_name == username))
     requests = result.scalars().all()
 
     return requests
