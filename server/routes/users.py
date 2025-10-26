@@ -3,27 +3,31 @@ from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import Select
 from sqlalchemy.orm import Session
-from server.db.database import get_db
+from server.db.database import get_db, ROOT_URL
 from server.db.models import UserModel
 from passlib.context import CryptContext
+import requests
 
 router = APIRouter(prefix="/users", tags=["users"])
 pwd_context = CryptContext(schemes=["bcrypt"])
+
 
 class Users(BaseModel):
     username: str
     password: str
 
 
-async def authenticate(username, password):
+def authenticate(username, password):
 
-    user_details: Optional[Users] = await get_user_by_username(username)
+    response = requests.get(f"{ROOT_URL}users/get_user/{username}").json()
 
-    if(user_details is None):
-        raise HTTPException(status_code=401, detail="invalid username")
+    if(response is None):
+        return "Invalid Username"
 
-    if(not pwd_context.verify(password, user_details.password)): 
-        raise HTTPException(status_code=401, detail="invaid password")
+    if(not pwd_context.verify(password, response["password"])): 
+        return "Invalid Password"
+
+    return "success"
 
 
 @router.post("/create")
@@ -39,7 +43,6 @@ async def create_user(user: Users, db: Session = Depends(get_db)):
 @router.get("/get_user/{username}")
 async def get_user_by_username(username: str, db: Session = Depends(get_db)):
     result = db.execute(Select(UserModel).where(UserModel.username == username))
-    user = result.scalars().first()
-    
-    # returns None if user is not found
+    user: Optional[Users] = result.scalars().first()
+
     return user

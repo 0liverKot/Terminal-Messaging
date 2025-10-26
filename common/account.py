@@ -1,7 +1,7 @@
 import json
 import requests
 from server.db.database import ROOT_URL
-from server.routes.users import Users
+from server.routes.users import Users, authenticate
 
 class Account:
 
@@ -13,8 +13,8 @@ class Account:
         try: 
             with open("common/userdetails.json", "r") as file:
                 details = json.loads(file.read())
-                self.set_username(details["username"])
-                self.set_password(details["password"])
+                self.username = details["username"]
+                self.password = details["password"]
 
         except:            
             # attempts to create a userdetails.json file if it doesn't exist
@@ -25,8 +25,14 @@ class Account:
             file.close()
             self.__init__()
 
+        if(self.username != ""):
+            auth = authenticate(self.username, self.password)
+            if auth == "success":
+                return
+            else:
+                exit(auth)
 
-        if(self.get_username() == ""):
+        else:
             
             while True:
                 username = input("\n        Enter a username: ")
@@ -44,6 +50,8 @@ class Account:
                     continue 
 
                 break
+    
+
 
             password = input("\n        Enter a password: ")
             
@@ -79,6 +87,7 @@ class Account:
     def set_password(self, password):
         self.password = password
         
+
         if password == "":
             return
 
