@@ -1,6 +1,7 @@
 # user details are stored locally allowing for instant login
 # these details are stored in userdetails.json
 userdetails.json
+.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

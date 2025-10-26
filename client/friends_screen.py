@@ -187,21 +187,39 @@ class FriendsScreen(Screen):
                 self.app.push_screen("add friends")
 
         try:
+            if event.button.id is None:
+                return 
+
+            type = event.button.id.split("-")[0]
+            id = event.button.id.split("-")[1]
+            match type:
+
             # pressing a request then replaces it with accept or decline buttons
-            if(event.button.id.split("-")[0] == "request"): # type: ignore
+                case "request":
+                    container_id = f"container-{id}"           
+                    container = self.query_one(f"#{container_id}", Horizontal)
+                    event.button.remove()
 
-                id = event.button.id.split("-")[1] # type: ignore
-                container_id = f"container-{id}"           
-                container = self.query_one(f"#{container_id}", Horizontal)
-                event.button.remove()
+                    container.mount(Button("✓", id=f"accept-{id}", classes="accept"))
+                    container.mount(Button("x", id=f"decline-{id}", classes="decline"))
 
-                container.mount(Button("✓", id=f"accept-{id}", classes="accept"))
-                container.mount(Button("x", id=f"decline-{id}", classes="decline"))
+                    container.refresh()
+                
+                # accepting a friend request
+                case "accept":
+                    # add a new friend and delete the request
+                    sender_name = id
+                    recipient_name = self.account.get_username()
+                    requests.post(f"{ROOT_URL}friends/create/{sender_name}/{recipient_name}")
+                    requests.delete(f"{ROOT_URL}requests/delete/{sender_name}/{recipient_name}")
 
-                container.refresh()
+                # declining a friend request
+                case "decline":
+                    sender_name = id
+                    recipient_name = self.account.get_username()
+                    requests.delete(f"{ROOT_URL}requests/delete/{sender_name}/{recipient_name}")
         except:
-            pass        
-
+            pass
 
 
 class AddFriends(Screen):

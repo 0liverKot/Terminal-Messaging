@@ -1,9 +1,10 @@
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import Select
 from sqlalchemy.orm import Session
 from server.db.database import get_db
 from server.db.models import RequestsModel
+
 
 router = APIRouter(prefix="/requests", tags=["requests"])
 
@@ -19,9 +20,20 @@ async def get_users_requests(username: str, db: Session = Depends(get_db)):
 
     return requests
 
-@router.post("/create")
-async def create_friend_request(request: Requests, db: Session = Depends(get_db)):
-    db_request = RequestsModel(sender_name=request.sender_name, recipient_name=request.recipient_name)
+
+@router.post("/create/{sender_name}/{recipient_name}")
+async def create_friend_request(sender_name: str, recipient_name: str, db: Session = Depends(get_db)):
+    db_request = RequestsModel(sender_name=sender_name, recipient_name=recipient_name)
     db.add(db_request)
     db.commit()
     db.refresh(db_request)
+
+
+@router.delete("/delete/{sender_name}/{recipient_name}")
+async def delete_request(sender_name: str, recipient_name: str, db: Session = Depends(get_db)):
+    result = db.execute(Select(RequestsModel).where(RequestsModel.recipient_name == recipient_name and RequestsModel.sender_name == sender_name)).scalars().first()
+    if result is None:
+        raise HTTPException(status_code=404, detail="friend request not found")
+    
+    db.delete(result)
+    db.commit()

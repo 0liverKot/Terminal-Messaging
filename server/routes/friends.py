@@ -20,16 +20,16 @@ async def get_users_friends(username: str, db: Session = Depends(get_db)):
 
     return friends
 
-@router.post("/create")
-async def create_friendship(friend: Friends, db: Session = Depends(get_db)):
-    db_friend = FriendsModel(user_name=friend.user_name, friend_name=friend.friend_name, conversation_id=None)
+@router.post("/create/{user_name}/{friend_name}")
+async def create_friendship(user_name: str, friend_name: str, db: Session = Depends(get_db)):
+    db_friend = FriendsModel(user_name=user_name, friend_name=friend_name, conversation_id=None)
     db.add(db_friend)
     db.commit()
     db.refresh(db_friend)
 
     # another entry with names the other way around
     # if user1 has friend user2 then user2 also has friend user1, must be stored
-    db_friend = FriendsModel(user_name=friend.friend_name, friend_name=friend.user_name)
+    db_friend = FriendsModel(user_name=friend_name, friend_name=user_name)
     db.add(db_friend)
     db.commit()
     db.refresh(db_friend)
