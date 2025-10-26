@@ -87,7 +87,7 @@ class FriendsScreen(Screen):
 
 
         async def mount_scroll_widget(type, id, list):
-            
+
             v_scroll = VerticalScroll(id=id)
             container = self.query_one("#friends-button-container", Container)
 
@@ -191,6 +191,9 @@ class FriendsScreen(Screen):
                 return 
 
             type = event.button.id.split("-")[0]
+            if type not in ["accept", "decline", "request"]:
+                return
+
             id = event.button.id.split("-")[1]
             match type:
 
@@ -207,14 +210,22 @@ class FriendsScreen(Screen):
                 
                 # accepting a friend request
                 case "accept":
+                    # delete the buttons 
+                    button_container = self.query_one(f"#container-{id}", Horizontal)
+                    button_container.remove()
+                    
                     # add a new friend and delete the request
                     sender_name = id
                     recipient_name = self.account.get_username()
                     requests.post(f"{ROOT_URL}friends/create/{sender_name}/{recipient_name}")
                     requests.delete(f"{ROOT_URL}requests/delete/{sender_name}/{recipient_name}")
-
+                
                 # declining a friend request
                 case "decline":
+                    # delete the buttons 
+                    button_container = self.query_one(f"#container-{id}", Horizontal)
+                    button_container.remove()
+
                     sender_name = id
                     recipient_name = self.account.get_username()
                     requests.delete(f"{ROOT_URL}requests/delete/{sender_name}/{recipient_name}")
