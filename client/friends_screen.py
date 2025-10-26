@@ -86,14 +86,16 @@ class FriendsScreen(Screen):
             return arrow
 
 
-        async def mount_scroll_widget(id, list):
+        async def mount_scroll_widget(type, id, list):
             
             v_scroll = VerticalScroll(id=id)
             container = self.query_one("#friends-button-container", Container)
 
+            if type == "friends":
+                button = self.query_one(f"#add-friend-button", Button)
+            else:
+                button = self.query_one("#requests-button", Button)
 
-            button = self.query_one(f"#{type}-button", Button)
-            
             await container.mount(v_scroll, after=button)
             container.refresh()
 
@@ -141,7 +143,7 @@ class FriendsScreen(Screen):
                     if(len(list) == 0):
                         return
 
-                    await mount_scroll_widget("requests-list", list)
+                    await mount_scroll_widget("requests", "requests-list", list)
 
 
             case "friends-button": 
@@ -177,7 +179,7 @@ class FriendsScreen(Screen):
                     if(len(list) == 0):
                         return
 
-                    await mount_scroll_widget("friends-list", list)
+                    await mount_scroll_widget("friends", "friends-list", list)
 
             case "add-friend-button":
                 
