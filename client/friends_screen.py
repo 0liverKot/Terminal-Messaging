@@ -19,6 +19,7 @@ class FriendsScreen(Screen):
         super().__init__()
         self.account: Account = account
 
+    
     # used in buttons to represent toggling
     requests_arrow = "^"
     friends_arrow = "^"
@@ -39,6 +40,10 @@ class FriendsScreen(Screen):
     def get_friends(self):
         result = requests.get(f"{ROOT_URL}friends/get_by_user/{self.account.get_username()}").json()
         return result
+
+
+    def _on_mount(self) -> None:
+        self.app.install_screen(AddFriends(self.account), "add friends")
 
 
     def compose(self) -> ComposeResult:
@@ -182,9 +187,8 @@ class FriendsScreen(Screen):
                     await mount_scroll_widget("friends", "friends-list", list)
 
             case "add-friend-button":
-                
-                self.app.install_screen(AddFriends(), "add friends")
                 self.app.push_screen("add friends")
+
 
         try:
             if event.button.id is None:
@@ -241,9 +245,34 @@ class AddFriends(Screen):
     # once the user starts typing, users are filterd and added to display array
 
     users: list
+    account: Account
 
-    async def on_mount(self):
-        self.users = requests.get(f"{ROOT_URL}users/get").json()
+    def __init__(self, account: Account):
+        super().__init__()
+        self.account: Account = account
+
+
+    def on_mount(self) -> None:
+        
+        users = requests.get(f"{ROOT_URL}users/get").json()
+        requests_recieved = requests.get(f"{ROOT_URL}requests/get_by_user/{self.account.username}").json()
+        requests_sent = requests.get(f"{ROOT_URL}requests/get_sent/{self.account.username}").json()
+        friends = requests.get(f"{ROOT_URL}friends/get_by_user/{self.account.username}").json()
+
+        users.remove(self.account.username)
+
+
+        for friend in friends:
+            users.remove(friend)
+
+        for request_recieved in requests_recieved : 
+            users.remove(request_recieved)
+
+        for request_sent in requests_sent: 
+            users.remove(request_sent)
+
+        self.users = users
+
 
     def compose(self) -> ComposeResult:
 
@@ -287,3 +316,27 @@ class AddFriends(Screen):
             v_scroll_users.mount(button)
 
         v_scroll_users.refresh()
+
+    
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        
+        if event.button.id == None:
+            return
+
+        try: 
+            button_type = event.button.id.split("-")[0] 
+        except:
+            pass # incase some mysterious button is pressed to make sure program doesnt crash 
+
+
+        if button_type == "addfriend":
+            sender_name = self.account.username
+            recipient_name = event.button.id.split("-")[1]
+
+            # send request 
+            requests.post(f"{ROOT_URL}friends/create/{sender_name}/{recipient_name}")
+
+            event.button.remove()
+
+            v_scroll_users = self.query_one("#users-vertical-scroll", VerticalScroll)
+            v_scroll_users.refresh()
