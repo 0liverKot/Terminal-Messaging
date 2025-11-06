@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, TEXT, VARCHAR
+from sqlalchemy import Column, ForeignKey, Integer, VARCHAR, JSON
 from .database import Base
 
 
@@ -12,7 +12,7 @@ class UserModel(Base):
 class ConversationModel(Base):
     __tablename__ = "conversation"
     id = Column(Integer, primary_key=True, index=True)
-    messages = Column(TEXT)
+    messages = Column(JSON, default=list)
 
 
 class FriendsModel(Base):

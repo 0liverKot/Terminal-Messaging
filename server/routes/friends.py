@@ -3,7 +3,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import Select
 from server.db.database import get_db
-from server.db.models import FriendsModel
+from server.db.models import FriendsModel, ConversationModel
+from server.routes.conversations import Conversation, create_conversation
+import json 
 
 router = APIRouter(prefix="/friends", tags=["friends"])
 
@@ -20,6 +22,7 @@ async def get_users_friends(username: str, db: Session = Depends(get_db)):
 
     return friends
 
+
 @router.post("/create/{user_name}/{friend_name}")
 async def create_friendship(user_name: str, friend_name: str, db: Session = Depends(get_db)):
     db_friend = FriendsModel(user_name=user_name, friend_name=friend_name, conversation_id=None)
@@ -33,3 +36,41 @@ async def create_friendship(user_name: str, friend_name: str, db: Session = Depe
     db.add(db_friend)
     db.commit()
     db.refresh(db_friend)
+
+
+@router.post("/create/conversation")
+async def create_conversation_friends(friendship: Friends, db: Session = Depends(get_db)):
+    user1 = friendship.user_name
+    user2 = friendship.friend_name
+    conversation_id = friendship.conversation_id
+
+    new_conversation_id = db.query(ConversationModel).count()
+    messages = [{}]
+    conversation = Conversation(id=new_conversation_id, messages=messages)
+    await create_conversation(conversation, db=db)
+
+    # update the conversation_id for each friendship entity
+    await update_conversation_id(Friends(
+        user_name=user1, 
+        friend_name=user2, 
+        conversation_id=conversation_id), new_conversation_id, db=db)
+    
+    await update_conversation_id(Friends(
+        user_name=user2, 
+        friend_name=user1, 
+        conversation_id=conversation_id), new_conversation_id, db=db)
+    
+    
+@router.put("/update/conversation_id")
+async def update_conversation_id(friendship: Friends, id: int, db: Session = Depends(get_db)):
+    result = db.execute(Select(FriendsModel).where(
+        (FriendsModel.user_name == friendship.user_name) & 
+        (FriendsModel.friend_name == friendship.friend_name)))
+    
+    db_friendship = result.scalars().first()
+
+    if db_friendship is None:
+        return 
+
+    db_friendship.conversation_id = id
+    db.commit()
