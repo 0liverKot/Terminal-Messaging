@@ -21,6 +21,14 @@ async def get_users_requests(username: str, db: Session = Depends(get_db)):
     return requests
 
 
+@router.get("/get_sent/{username}")
+async def get_users_requests_sent(username: str, db: Session = Depends(get_db)):
+    result = db.execute(Select(RequestsModel.recipient_name).where(RequestsModel.sender_name == username))
+    requests = result.scalars().all()
+
+    return requests
+
+
 @router.post("/create/{sender_name}/{recipient_name}")
 async def create_friend_request(sender_name: str, recipient_name: str, db: Session = Depends(get_db)):
     db_request = RequestsModel(sender_name=sender_name, recipient_name=recipient_name)
