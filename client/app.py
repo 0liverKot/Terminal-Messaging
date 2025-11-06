@@ -13,8 +13,14 @@ class MyApp(App[str]):
     CSS_PATH="css/app.tcss"
 
     def __init__(self):
-       
-        self.account = Account(sys.argv[1])
+        
+        # no specified account to use, hence use default 
+        if len(sys.argv) == 1:
+            self.account = Account("userdetails.json")
+        else:
+            self.account = Account(sys.argv[1])
+
+        
         self.typing = False
         super().__init__()
 
