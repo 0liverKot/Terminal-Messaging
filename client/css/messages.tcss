@@ -1,0 +1,10 @@
+Screen {
+    align: center middle;
+}
+
+#v-scroll-messages { 
+    align: center middle;
+    width: 50;
+    height: 15;
+    border: solid white;
+}

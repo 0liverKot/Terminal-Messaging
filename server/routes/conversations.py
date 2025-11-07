@@ -6,7 +6,7 @@ from sqlalchemy import Select
 from server.db.database import get_db
 from server.db.models import ConversationModel, FriendsModel
 
-router = APIRouter(tags=["conversations"])
+router = APIRouter(prefix="/conversations", tags=["conversations"])
 
 class Conversation(BaseModel):
     id: int
@@ -33,6 +33,6 @@ async def get_users_non_empty_conversations(username: str, db: Session = Depends
         if conversation is None:
             continue 
 
-        non_empty_conversations.append({"friend": friend, "conversation": conversation})
+        non_empty_conversations.append({"friend": friend.friend_name, "conversation-id": conversation})
 
     return non_empty_conversations

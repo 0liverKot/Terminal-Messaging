@@ -1,3 +1,4 @@
+import requests
 from textual.screen import Screen
 from textual.app import ComposeResult
 from common.account import Account
@@ -16,8 +17,14 @@ class MessagesScreen(Screen):
         super().__init__()
         self.account = account
 
-    def compose(self) -> ComposeResult:
+    def on_mount(self) -> None:
 
-        yield Header()
+        self.mount(Header())
+        previous_conversations = requests.get(f"{ROOT_URL}conversations/get/non_empty_conversations/{self.account.username}").json()
 
-        previous_messages = 
+        self.mount(VerticalScroll(id="v-scroll-messages"))
+        v_scroll = self.query_one("#v-scroll-messages")
+
+        for conversation in previous_conversations:
+            button = Button(f"{conversation["friend"]}", id=f"{conversation["friend"]}")
+            v_scroll.mount(button)

@@ -334,7 +334,7 @@ class AddFriends(Screen):
             recipient_name = event.button.id.split("-")[1]
 
             # send request 
-            requests.post(f"{ROOT_URL}friends/create/{sender_name}/{recipient_name}")
+            requests.post(f"{ROOT_URL}requests/create/{sender_name}/{recipient_name}")
 
             event.button.remove()
 
