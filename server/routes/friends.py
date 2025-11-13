@@ -1,10 +1,12 @@
+from typing import Optional
 from pydantic import BaseModel
+from fastapi import HTTPException
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import Select
 from server.db.database import get_db
 from server.db.models import FriendsModel, ConversationModel
-from server.routes.conversations import Conversation, create_conversation
+import server.routes.conversations as conversations
 import json 
 
 router = APIRouter(prefix="/friends", tags=["friends"])
@@ -21,6 +23,18 @@ async def get_users_friends(username: str, db: Session = Depends(get_db)):
     friends = result.scalars().all()
 
     return friends
+
+
+@router.get("/get_friendship/{friend_name}/{username}", 
+            response_model=Friends)
+async def get_friendship(username: str, friend_name: str, db: Session = Depends(get_db)) -> Friends:
+    result = db.execute(Select(FriendsModel).where((FriendsModel.user_name == username) & (FriendsModel.friend_name == friend_name)))
+    friendship: Optional[Friends] = result.scalars().first()
+
+    if friendship is None:
+        raise HTTPException(status_code=404, detail=f"friend: {friend_name} not found")
+
+    return friendship
 
 
 @router.post("/create/{user_name}/{friend_name}")
@@ -46,8 +60,8 @@ async def create_conversation_friends(friendship: Friends, db: Session = Depends
 
     new_conversation_id = db.query(ConversationModel).count()
     messages = [{}]
-    conversation = Conversation(id=new_conversation_id, messages=messages)
-    await create_conversation(conversation, db=db)
+    conversation = conversations.Conversation(id=new_conversation_id, messages=messages)
+    await conversations.create_conversation(conversation, db=db)
 
     # update the conversation_id for each friendship entity
     await update_conversation_id(Friends(
