@@ -8,6 +8,7 @@ from textual.containers import Container, VerticalScroll, Horizontal
 from server.db.database import ROOT_URL
 import requests
 from common.account import Account
+from client.chatroom import ChatroomScreen
 
 class FriendsScreen(Screen):
     TITLE="Friends"
@@ -82,6 +83,9 @@ class FriendsScreen(Screen):
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
 
+        if event.button.id == None:
+            return
+
         def toggle_arrow(arrow):
             if(arrow == "⌄"):
                 arrow = "^"
@@ -115,7 +119,7 @@ class FriendsScreen(Screen):
                     request_container.mount(button)
 
                 else:
-                    button = Button(f"{i}", classes="friends-scroll-button")
+                    button = Button(f"{i}", id=f"friend-{i}", classes="friends-scroll-button")
                     v_scroll.mount(button)
                 
             v_scroll.refresh()
@@ -189,6 +193,13 @@ class FriendsScreen(Screen):
             case "add-friend-button":
                 self.app.push_screen("add friends")
 
+
+        if event.button.id.split("-")[0] == "friend":
+
+            friend_name = event.button.id.split("-")[1]
+
+            self.app.install_screen(ChatroomScreen(self.account, friend_name), "chatroom")
+            self.app.push_screen("chatroom")
 
         try:
             if event.button.id is None:

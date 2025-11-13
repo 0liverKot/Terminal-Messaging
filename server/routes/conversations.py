@@ -3,9 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import Select, Sequence
-from server.db.database import get_db
+from server.db.database import get_db, ROOT_URL
 from server.db.models import ConversationModel, FriendsModel
 import server.routes.friends as friends
+import requests
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
@@ -13,12 +14,23 @@ class Conversation(BaseModel):
     id: int
     messages: List[Dict[str, Any]]
 
+
 @router.post("/create")
 async def create_conversation(conversation: Conversation, db: Session = Depends(get_db)):
     db_conversation = ConversationModel(id=conversation.id, messages=conversation.messages)
     db.add(db_conversation)
     db.commit()
     db.refresh(db_conversation)
+
+@router.put("/add_message")
+async def add_message(conversation: Conversation, message: dict[str, str], db: Session = Depends(get_db)):
+
+    if message["{sender}"] is None:
+        return
+    
+    conversation.messages.append(message)
+    db.commit()
+
 
 
 @router.get("/get/non_empty_conversations/{username}")
@@ -39,10 +51,10 @@ async def get_users_non_empty_conversations(username: str, db: Session = Depends
     return non_empty_conversations
 
 
-@router.get("/get/conversation_with/{friend_name}/{username}",
+@router.get("/get/conversation_with",
             response_model=Conversation)
-async def get_conversation_with(username: str, friend_name: str, db: Session = Depends(get_db)) -> Conversation:
-    friendship: friends.Friends = await friends.get_friendship(username, friend_name)
+async def get_conversation_with(friendship: friends.Friends, db: Session = Depends(get_db)) -> Conversation:
+    
     conversation_id = friendship.conversation_id
 
     result = db.execute(Select(ConversationModel).where(ConversationModel.id == conversation_id))

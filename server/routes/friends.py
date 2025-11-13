@@ -25,9 +25,8 @@ async def get_users_friends(username: str, db: Session = Depends(get_db)):
     return friends
 
 
-@router.get("/get_friendship/{friend_name}/{username}", 
-            response_model=Friends)
-async def get_friendship(username: str, friend_name: str, db: Session = Depends(get_db)) -> Friends:
+@router.get("/get_friendship/{friend_name}/{username}")
+async def get_friendship(username: str, friend_name: str, db: Session = Depends(get_db)):
     result = db.execute(Select(FriendsModel).where((FriendsModel.user_name == username) & (FriendsModel.friend_name == friend_name)))
     friendship: Optional[Friends] = result.scalars().first()
 
