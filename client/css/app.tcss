@@ -14,7 +14,7 @@ Header {
 
 Vertical {
     border: solid white;
-    width: auto;
+    width: 80%;
     height: auto;
 }
 
@@ -22,7 +22,7 @@ Button {
     text-style: bold;
     background: transparent;
     border: none;
-    width: 50;
+    width: 100%
 }
 
 Button:focus {

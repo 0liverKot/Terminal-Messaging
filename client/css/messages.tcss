@@ -4,7 +4,7 @@ Screen {
 
 #v-scroll-messages { 
     align: center middle;
-    width: 50;
-    height: 15;
+    width: 80%;
+    height: 50%;
     border: solid white;
 }

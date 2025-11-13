@@ -4,7 +4,7 @@ Screen {
 
 #friends-button-container {
     align: center middle;
-    width: auto;
+    width: 80%;
     height: auto;
 }
 
@@ -12,14 +12,14 @@ Screen {
 }
 
 VerticalScroll {
-    width: 50;
+    width: 100%;
     height: 6;
     border: solid white
 
 }
 
 VerticalScroll Horizontal {
-    width: 50;
+    width: 100%;
     height: auto;
     align: left middle;
 }
@@ -31,17 +31,17 @@ VerticalScroll Horizontal {
 
 .accept {
     color: green;
-    width: 25;
+    width: 50%;
 
 }
 
 .decline {
     color: red;
-    width: 25;
+    width: 50%;
 }
 
 #new-friends-button {
-    width: 10
+    width: 25%
 }
 
 
@@ -61,7 +61,7 @@ VerticalScroll Horizontal {
 }
 
 Input {
-    width: 50;
+    width: 100%;
     height: 3;
 }
 
