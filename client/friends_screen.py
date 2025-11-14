@@ -43,10 +43,6 @@ class FriendsScreen(Screen):
         return result
 
 
-    def _on_mount(self) -> None:
-        self.app.install_screen(AddFriends(self.account), "add friends")
-
-
     def compose(self) -> ComposeResult:
         
         yield Header()
@@ -191,6 +187,7 @@ class FriendsScreen(Screen):
                     await mount_scroll_widget("friends", "friends-list", list)
 
             case "add-friend-button":
+                self.app.install_screen(AddFriends(self.account), "add friends")
                 self.app.push_screen("add friends")
 
 

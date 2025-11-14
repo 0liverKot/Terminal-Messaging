@@ -36,10 +36,6 @@ class MyApp(App[str]):
             id="button-container"
         )
 
-    def on_mount(self) -> None:
-
-        self.install_screen(FriendsScreen(self.account), name="friends")
-        self.install_screen(MessagesScreen(self.account), name="messages")
 
     def on_key(self, event: events.Key) -> None:
         
@@ -51,7 +47,9 @@ class MyApp(App[str]):
 
             case "q": 
                 if (not self.typing):
+                    current_screen = self.screen
                     self.pop_screen()
+                    self.uninstall_screen(current_screen)
 
         return 
 
@@ -60,17 +58,17 @@ class MyApp(App[str]):
 
         match event.button.id:
             
-            case "message-button": (
+            case "message-button": 
+                self.install_screen(MessagesScreen(self.account), name="messages")
                 self.push_screen("messages")
-            )
 
-            case "friends-button": (
+            case "friends-button": 
+                self.install_screen(FriendsScreen(self.account), name="friends")
                 self.push_screen("friends")
-            )
-
-            case "exit-button": (
+            
+            case "exit-button": 
                 self.exit()
-            )
+            
 
 
 if __name__ == "__main__":
