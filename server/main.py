@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .db.models import Base
 from .db.database import engine
 from .routes import users, conversations, websocket, requests, friends
+import asyncio
 
 app = FastAPI()
 router = APIRouter(tags=["websockets"])

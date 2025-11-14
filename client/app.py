@@ -29,8 +29,8 @@ class MyApp(App[str]):
         yield Header()
         yield Container(
             Vertical(
-                Button("Messages", id="message-button"),
-                Button("Friends", id="friends-button"),
+                Button("Messages", id="message-screen-button"),
+                Button("Friends", id="friends-screen-button"),
                 Button("Exit", id="exit-button")
             ),
             id="button-container"
@@ -58,11 +58,11 @@ class MyApp(App[str]):
 
         match event.button.id:
             
-            case "message-button": 
+            case "message-screen-button": 
                 self.install_screen(MessagesScreen(self.account), name="messages")
                 self.push_screen("messages")
 
-            case "friends-button": 
+            case "friends-screen-button": 
                 self.install_screen(FriendsScreen(self.account), name="friends")
                 self.push_screen("friends")
             
