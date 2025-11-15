@@ -1,8 +1,9 @@
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import Select, Sequence
+from sqlalchemy import Select
+from sqlalchemy.orm.attributes import flag_modified
 from server.db.database import get_db, ROOT_URL
 from server.db.models import ConversationModel, FriendsModel
 import server.routes.friends as friends
@@ -22,13 +23,18 @@ async def create_conversation(conversation: Conversation, db: Session = Depends(
     db.commit()
     db.refresh(db_conversation)
 
-@router.put("/add_message")
-async def add_message(conversation: Conversation, message: dict[str, str], db: Session = Depends(get_db)):
 
-    if message["{sender}"] is None:
-        return
+@router.put("/add_message/{conversation_id}")
+async def add_message(conversation_id: int, message: dict[str, str] = Body(...), db: Session = Depends(get_db)):
+
+    result = db.execute(Select(ConversationModel).where(ConversationModel.id == conversation_id))
+    conversation = result.scalars().first()
+
+    if conversation is None: 
+        return 
     
     conversation.messages.append(message)
+    flag_modified(conversation, "messages")
     db.commit()
 
 
@@ -51,13 +57,10 @@ async def get_users_non_empty_conversations(username: str, db: Session = Depends
     return non_empty_conversations
 
 
-@router.get("/get/conversation_with",
-            response_model=Conversation)
-async def get_conversation_with(friendship: friends.Friends, db: Session = Depends(get_db)) -> Conversation:
+@router.get("/get/{id}")
+async def get_conversation_with(id: int, db: Session = Depends(get_db)) -> Conversation:
     
-    conversation_id = friendship.conversation_id
-
-    result = db.execute(Select(ConversationModel).where(ConversationModel.id == conversation_id))
+    result = db.execute(Select(ConversationModel).where(ConversationModel.id == id))
     conversation: Optional[Conversation] = result.scalars().first()
 
     if conversation is None:
