@@ -1,3 +1,4 @@
+from textual import on
 from textual.app import ComposeResult
 from textual.events import Compose, Key
 from textual.screen import Screen
@@ -55,7 +56,7 @@ class ChatroomScreen(Screen):
         self.messages = conversation_json["messages"]
 
         messages_container = VerticalScroll(id="messages-container")
-        message_input = Input(id="message-input")
+        message_input = Input(id="message-input", valid_empty=False)
         await self.mount(messages_container)
         
         await self.mount(message_input)
@@ -103,6 +104,7 @@ class ChatroomScreen(Screen):
         await message_container.mount(Label(content=f"{sender}"))
         await message_container.mount(Label(content=f"{text}"))
 
+
     async def listen_socket(self, user: str, friend: str):
         
         # chat_room is sorted identically to maintain consistency
@@ -117,4 +119,11 @@ class ChatroomScreen(Screen):
 
 
             await asyncio.gather(receive_mesages())
+
+
+    @on(Input.Submitted)
+    async def input_submit(self) -> None:
+        input = self.query_one(Input)
+        await self.add_message({"sender": self.username, "text": input.value})
+        input.clear()
 
