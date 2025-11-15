@@ -8,9 +8,6 @@ Screen {
     height: auto;
 }
 
-#friends-button-container Button {
-}
-
 VerticalScroll {
     width: 100%;
     height: 6;

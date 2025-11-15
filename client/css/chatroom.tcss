@@ -2,13 +2,30 @@ Screen {
     align: center middle;
 }
 
-#messages-container { 
-    height: 50%;
-    width: 80%%;
-    align: center middle;
+#messages-container {
+    align: center top; 
+    height: 60%;
+    width: 80%;
+    border: solid white;
 }
 
-#message-input {
-    width: 80%;
-    align: center middle;
+.user {
+    align-horizontal: left;
+    height: auto;
+    border: solid white;
+}
+
+.friend {
+    align-horizontal: right;
+    height: auto;
+    border: solid white;
+
+}
+
+Label {
+    border: solid white
+}
+
+Input {
+    width: 80%; 
 }

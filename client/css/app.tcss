@@ -4,7 +4,7 @@
 
 Header {
     position: absolute;
-    offset-y: 3;
+    offset-y: 2;
     text-align: center;
 }
 
