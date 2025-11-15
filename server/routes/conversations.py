@@ -7,7 +7,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from server.db.database import get_db, ROOT_URL
 from server.db.models import ConversationModel, FriendsModel
 import server.routes.friends as friends
-import requests
+import logging
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
@@ -29,6 +29,7 @@ async def add_message(conversation_id: int, message: dict[str, str] = Body(...),
 
     result = db.execute(Select(ConversationModel).where(ConversationModel.id == conversation_id))
     conversation = result.scalars().first()
+
 
     if conversation is None: 
         return 

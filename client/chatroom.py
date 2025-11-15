@@ -23,6 +23,7 @@ class ChatroomScreen(Screen):
 
     websocket: websockets.ClientConnection
     messages: list[dict[str, str]]
+    conversation_id: int
 
     def __init__(self, account: Account, friend_name: str):
         super().__init__()
@@ -63,6 +64,7 @@ class ChatroomScreen(Screen):
             f"{ROOT_URL}conversations/get/{friendship_json["conversation_id"]}", json=friendship_json)
         conversation_json = response.json()
         self.messages = conversation_json["messages"]
+        self.conversation_id = conversation_json["id"]
 
         messages_container = VerticalScroll(id="messages-container")
         message_input = Input(id="message-input", valid_empty=False)
@@ -106,7 +108,7 @@ class ChatroomScreen(Screen):
         else:
             message_class = "friend"
 
-        messages_container = self.query_one("#messages-container")
+        messages_container = self.query_one("#messages-container", VerticalScroll)
 
         message_container = Container(classes=f"{message_class}")
         await messages_container.mount(message_container)
@@ -144,4 +146,6 @@ class ChatroomScreen(Screen):
 
         await self.add_message(message_dict)
         await self.websocket.send(json.dumps(message_dict))
+
+        requests.put(f"{ROOT_URL}conversations/add_message/{self.conversation_id}", json=message_dict)
 
