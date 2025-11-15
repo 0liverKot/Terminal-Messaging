@@ -1,4 +1,5 @@
-from textual import on
+import json
+from textual import on, work
 from textual.app import ComposeResult
 from textual.events import Compose, Key
 from textual.screen import Screen
@@ -35,6 +36,14 @@ class ChatroomScreen(Screen):
         self.username = account.username
         self.friend_name = friend_name
 
+    # using this ensures self.username has already been set
+    # needed for use in on_mount incase it runs before __init__
+    def get_username(self):
+        while True:
+            if self.username is None:
+                pass
+            else: 
+                return self.username
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -42,8 +51,8 @@ class ChatroomScreen(Screen):
 
     async def _on_mount(self) -> None:
 
-        # socket runnint in background
-        threading.Thread(target=self.listen_socket, daemon=True, args=(self.username, self.friend_name)).start()
+        # socket running in background
+        self.run_worker(self.listen_socket(self.username, self.friend_name), thread=True)
 
         response = requests.get(
             f"{ROOT_URL}friends/get_friendship/{self.friend_name}/{self.username}"
@@ -110,12 +119,17 @@ class ChatroomScreen(Screen):
         # chat_room is sorted identically to maintain consistency
         users = sorted([user, friend])
         chat_room = f"{users[0]}-{users[1]}"
-        async with websockets.connect("ws://localhost:8000/ws") as ws:
+        username = self.get_username()
+        async with websockets.connect(f"ws://localhost:8000/ws/{username}") as ws:
             await ws.send(chat_room)
             self.websocket = ws
 
             async def receive_mesages():
-                message = ws.recv()
+                while True:
+                    message = await ws.recv()
+                    message_json = json.loads(message)
+                    dict = {"sender": friend, "text": list(message_json.values())[1]}
+                    await self.add_message(dict)
 
 
             await asyncio.gather(receive_mesages())
@@ -123,7 +137,11 @@ class ChatroomScreen(Screen):
 
     @on(Input.Submitted)
     async def input_submit(self) -> None:
+        
         input = self.query_one(Input)
-        await self.add_message({"sender": self.username, "text": input.value})
+        message_dict = {"sender": self.username, "text": input.value}  
         input.clear()
+
+        await self.add_message(message_dict)
+        await self.websocket.send(json.dumps(message_dict))
 
